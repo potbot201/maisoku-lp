@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>販売図面ビルダー ― 入力するだけで、マイソクとSNS投稿が同時にできる。</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1c2b45;
+  --navy-deep:#0f1a2c;
+  --gold:#b8862c;
+  --gold-soft:#e7d3a1;
+  --paper:#faf8f4;
+  --paper-deep:#f1ece0;
+  --ink:#1c1a17;
+  --ink-soft:#645d51;
+  --line:#e2ddd0;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Zen Kaku Gothic New', sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%; display:block;}
+.wrap{max-width:1080px; margin:0 auto; padding:0 32px;}
+h1,h2,h3{font-family:'Shippori Mincho', serif; margin:0;}
+
+/* reveal on scroll */
+.reveal{opacity:0; transform:translateY(28px); transition:opacity .9s cubic-bezier(.16,1,.3,1), transform .9s cubic-bezier(.16,1,.3,1);}
+.reveal.in{opacity:1; transform:none;}
+
+/* ===== NAV ===== */
+.nav{
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 32px;
+  background:rgba(250,248,244,0);
+  transition:background .35s ease, box-shadow .35s ease, padding .35s ease;
+}
+.nav.scrolled{
+  background:rgba(250,248,244,.86);
+  backdrop-filter:blur(14px) saturate(160%);
+  box-shadow:0 1px 0 var(--line);
+  padding:12px 32px;
+}
+.nav .brand{
+  font-family:'Shippori Mincho', serif;
+  font-weight:800; font-size:16px; letter-spacing:.02em; color:var(--navy);
+}
+.nav .brand span{color:var(--gold);}
+.nav a.cta{
+  font-size:12.5px; font-weight:700; letter-spacing:.04em;
+  background:var(--navy); color:#f2efe6; padding:9px 18px; border-radius:100px;
+  text-decoration:none;
+}
+
+/* ===== HERO ===== */
+.hero{
+  padding:190px 0 90px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+.hero .eyebrow{
+  font-size:12.5px; letter-spacing:.3em; color:var(--gold); font-weight:700; margin-bottom:18px;
+}
+.hero h1{
+  font-size:clamp(34px, 5.4vw, 64px);
+  font-weight:800; line-height:1.35; color:var(--navy);
+  letter-spacing:.01em;
+}
+.hero h1 em{font-style:normal; color:var(--gold);}
+.hero p.lead{
+  max-width:560px; margin:26px auto 0; font-size:16px; line-height:1.9; color:var(--ink-soft);
+}
+.hero-ctas{display:flex; gap:14px; justify-content:center; margin-top:38px;}
+.btn-primary, .btn-ghost{
+  font-size:14px; font-weight:700; padding:14px 30px; border-radius:100px; text-decoration:none; letter-spacing:.02em;
+}
+.btn-primary{background:var(--navy); color:#f2efe6;}
+.btn-ghost{border:1px solid var(--line); color:var(--ink);}
+
+/* ---- hero mockup: a floating flyer echo ---- */
+.hero-stage{
+  margin:80px auto 0; max-width:640px; position:relative; perspective:1400px;
+}
+.mock-flyer{
+  background:#fff; border-radius:14px; overflow:hidden;
+  box-shadow:0 40px 90px -20px rgba(28,43,69,.35), 0 4px 18px rgba(28,43,69,.12);
+  transform:rotateX(4deg);
+  animation:float 7s ease-in-out infinite;
+}
+@keyframes float{
+  0%,100%{transform:rotateX(4deg) translateY(0);}
+  50%{transform:rotateX(4deg) translateY(-14px);}
+}
+.mock-flyer .mf-header{
+  background:linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%);
+  color:#f2efe6; padding:22px 30px 18px; display:flex; justify-content:space-between; align-items:flex-end;
+  border-bottom:3px solid var(--gold);
+}
+.mock-flyer .mf-header .eb{font-size:10px; letter-spacing:.25em; color:var(--gold-soft); margin-bottom:6px;}
+.mock-flyer .mf-header h3{font-size:19px; font-weight:800; color:#fff;}
+.mock-flyer .mf-price{text-align:right;}
+.mock-flyer .mf-price .l{font-size:9px; letter-spacing:.15em; color:var(--gold-soft); display:block; margin-bottom:2px;}
+.mock-flyer .mf-price .v{font-family:'Shippori Mincho', serif; font-size:24px; font-weight:800; color:#fff;}
+.mock-flyer .mf-price .v span{font-size:12px; margin-left:2px; font-weight:500;}
+.mock-flyer .mf-body{padding:20px 30px 26px; display:grid; grid-template-columns:1.4fr 1fr; gap:16px;}
+.mock-flyer .mf-photo{background:linear-gradient(135deg,#e5e0d4,#d8d2c2); border-radius:6px; height:120px;}
+.mock-flyer .mf-side{display:grid; grid-template-rows:1fr 1fr; gap:8px;}
+.mock-flyer .mf-side div{background:#ece7da; border-radius:6px;}
+.mock-flyer .mf-lines{grid-column:1/-1; display:flex; flex-direction:column; gap:8px; margin-top:2px;}
+.mock-flyer .mf-lines .bar{height:8px; border-radius:4px; background:var(--paper-deep);}
+.mock-flyer .mf-lines .bar.w1{width:92%;} .mock-flyer .mf-lines .bar.w2{width:70%;} .mock-flyer .mf-lines .bar.w3{width:82%;}
+
+/* ===== SECTION SHELL ===== */
+.section{padding:120px 0;}
+.section.alt{background:var(--paper-deep);}
+.section-head{max-width:620px; margin:0 auto 64px; text-align:center;}
+.section-head .kicker{font-size:12px; letter-spacing:.28em; color:var(--gold); font-weight:700; margin-bottom:16px;}
+.section-head h2{font-size:clamp(26px, 3.4vw, 38px); color:var(--navy); line-height:1.5; font-weight:800;}
+.section-head p{margin-top:18px; font-size:15px; line-height:1.9; color:var(--ink-soft);}
+
+/* feature split rows */
+.split{display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center; padding:70px 0;}
+.split.rev .visual{order:2;} .split.rev .copy{order:1;}
+.split .copy .num{font-size:12px; letter-spacing:.2em; color:var(--gold); font-weight:700; margin-bottom:14px;}
+.split .copy h3{font-size:26px; color:var(--navy); line-height:1.5; font-weight:800; margin-bottom:16px;}
+.split .copy p{font-size:15px; line-height:1.95; color:var(--ink-soft); margin:0;}
+.split .visual{
+  background:#fff; border-radius:16px; padding:34px; border:1px solid var(--line);
+  box-shadow:0 30px 60px -30px rgba(28,43,69,.25);
+}
+
+/* ---- orientation demo ---- */
+.orient-demo{display:flex; flex-direction:column; align-items:center; gap:18px;}
+.orient-toggle{display:flex; border:1px solid var(--line); border-radius:100px; overflow:hidden;}
+.orient-toggle button{
+  border:none; background:transparent; padding:9px 20px; font-size:12.5px; font-family:inherit; cursor:pointer; color:var(--ink-soft);
+}
+.orient-toggle button.active{background:var(--navy); color:#f2efe6; font-weight:700;}
+.orient-canvas{
+  background:#fff; border:1px solid var(--line); border-radius:6px; box-shadow:0 20px 40px -20px rgba(0,0,0,.2);
+  transition:width .5s cubic-bezier(.16,1,.3,1), height .5s cubic-bezier(.16,1,.3,1);
+  overflow:hidden; position:relative;
+}
+.orient-canvas .oc-bar{position:absolute; top:0; left:0; right:0; height:22%; background:linear-gradient(135deg,var(--navy),var(--navy-deep)); border-bottom:2px solid var(--gold);}
+.orient-canvas .oc-body{position:absolute; top:26%; left:8%; right:8%; bottom:8%; display:flex; flex-direction:column; gap:6px;}
+.orient-canvas .oc-body .row{height:30%; background:var(--paper-deep); border-radius:3px;}
+
+/* ---- SNS ratio demo ---- */
+.sns-demo{display:flex; flex-direction:column; align-items:center; gap:18px;}
+.sns-toggle{display:flex; gap:8px;}
+.sns-toggle button{
+  border:1px solid var(--line); background:#fff; padding:8px 16px; border-radius:100px; font-size:12px; font-family:inherit; cursor:pointer; color:var(--ink-soft);
+}
+.sns-toggle button.active{background:var(--gold); border-color:var(--gold); color:#241a08; font-weight:700;}
+.sns-frame{
+  width:180px; background:var(--navy-deep); border-radius:14px; overflow:hidden; position:relative;
+  box-shadow:0 20px 44px -18px rgba(0,0,0,.4);
+  transition:height .45s cubic-bezier(.16,1,.3,1);
+}
+.sns-frame .sf-photo{position:absolute; inset:0; background:linear-gradient(160deg,#3a4356,#232d40);}
+.sns-frame .sf-grad{position:absolute; inset:0; background:linear-gradient(to top, rgba(15,26,44,.95) 5%, rgba(15,26,44,.5) 45%, transparent 70%);}
+.sns-frame .sf-content{position:absolute; left:0; right:0; bottom:0; padding:14px 16px 16px; color:#fff;}
+.sns-frame .sf-badge{display:inline-block; font-size:8.5px; letter-spacing:.1em; color:var(--gold-soft); border:1px solid var(--gold); padding:2px 8px; border-radius:20px; margin-bottom:8px;}
+.sns-frame .sf-title{font-family:'Shippori Mincho', serif; font-size:13px; font-weight:800; line-height:1.4; margin-bottom:8px;}
+.sns-frame .sf-price{font-family:'Shippori Mincho', serif; font-size:16px; font-weight:800; color:var(--gold-soft); border-top:1px solid rgba(231,211,161,.3); padding-top:8px;}
+
+/* ---- walk calc demo ---- */
+.walk-demo{display:flex; flex-direction:column; gap:16px; align-items:center; text-align:center;}
+.walk-demo input[type=range]{width:100%; accent-color:var(--gold);}
+.walk-demo .wd-row{display:flex; align-items:center; gap:16px; width:100%; max-width:320px;}
+.walk-demo .wd-out{font-family:'Shippori Mincho', serif; font-size:32px; font-weight:800; color:var(--navy);}
+.walk-demo .wd-out span{font-size:14px; font-weight:500; color:var(--ink-soft);}
+.walk-demo .wd-m{font-size:12.5px; color:var(--ink-soft); white-space:nowrap; min-width:76px; text-align:left;}
+
+/* ---- spec table mock ---- */
+.spec-mock{width:100%; border-collapse:collapse; font-size:13px;}
+.spec-mock th, .spec-mock td{padding:10px 12px; border-bottom:1px solid var(--line); text-align:left;}
+.spec-mock th{width:38%; color:var(--ink-soft); font-weight:500; background:var(--paper-deep);}
+
+/* ---- export badges ---- */
+.export-row{display:flex; gap:14px; justify-content:center; flex-wrap:wrap;}
+.export-badge{
+  display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--line); border-radius:100px; padding:12px 22px;
+  font-size:13px; font-weight:700; color:var(--navy);
+}
+.export-badge .dot{width:8px; height:8px; border-radius:50%; background:var(--gold);}
+
+/* ===== FINAL CTA ===== */
+.final{
+  background:linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%);
+  color:#f2efe6; padding:130px 0; text-align:center;
+}
+.final h2{font-size:clamp(28px,4vw,42px); font-weight:800; line-height:1.5;}
+.final h2 em{font-style:normal; color:var(--gold-soft);}
+.final p{max-width:480px; margin:22px auto 0; font-size:15px; line-height:1.9; color:#cfd6e4;}
+.final .btn-primary{background:var(--gold); color:#241a08; margin-top:36px; display:inline-block;}
+
+footer{padding:36px 0; text-align:center; font-size:12px; color:var(--ink-soft);}
+
+@media (max-width:820px){
+  .split, .split.rev{grid-template-columns:1fr; gap:32px;}
+  .split.rev .visual{order:1;} .split.rev .copy{order:2;}
+  .hero{padding:150px 0 60px;}
+  .section{padding:80px 0;}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav" id="nav">
+  <div class="brand">販売図面<span>自動化ツール</span></div>
+  <a class="cta" href="https://www.instagram.com/potdesign_maisoku/" target="_blank" rel="noopener">使ってみる</a>
+</nav>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">不動産業者営業向け</p>
+    <h1>物件情報を入力するだけで、<br><em>マイソクもSNS投稿も</em>、同時にできる。</h1>
+    <p class="lead">A4のチラシを作ったら、Instagram用の画像も別に作り直す。<br class="br-d">そのひと手間を、なくしました。</p>
+    <div class="hero-ctas">
+      <a class="btn-primary" href="https://www.instagram.com/potdesign_maisoku/" target="_blank" rel="noopener">今すぐ試す</a>
+      <a class="btn-ghost" href="#feature-orient">機能を見る</a>
+    </div>
+
+    <div class="hero-stage reveal" id="hero-stage">
+      <div class="mock-flyer">
+        <div class="mf-header">
+          <div>
+            <p class="eb">SALE ・ 新規公開</p>
+            <h3>桜ヶ丘レジデンス 3LDK</h3>
+          </div>
+          <div class="mf-price"><span class="l">価格</span><span class="v">4,980<span>万円</span></span></div>
+        </div>
+        <div class="mf-body">
+          <div class="mf-photo"></div>
+          <div class="mf-side"><div></div><div></div></div>
+          <div class="mf-lines">
+            <div class="bar w1"></div><div class="bar w2"></div><div class="bar w3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ===== FEATURE 1: 縦横切替 ===== -->
+<section class="section" id="feature-orient">
+  <div class="wrap">
+    <div class="split reveal">
+      <div class="copy">
+        <p class="num">01 ― フォーマット</p>
+        <h3>A4縦・横、ワンクリックで切り替え。</h3>
+        <p>データを一度入力すれば、掲示用の縦型も折込用の横型も、ボタンひとつで切り替わります。作り直しは要りません。</p>
+      </div>
+      <div class="visual">
+        <div class="orient-demo">
+          <div class="orient-toggle">
+            <button class="active" onclick="setOrient('p',this)">縦</button>
+            <button onclick="setOrient('l',this)">横</button>
+          </div>
+          <div class="orient-canvas" id="oc" style="width:150px; height:212px;">
+            <div class="oc-bar"></div>
+            <div class="oc-body"><div class="row"></div><div class="row"></div><div class="row"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURE 2: SNS比率 ===== -->
+<section class="section alt">
+  <div class="wrap">
+    <div class="split rev reveal">
+      <div class="visual">
+        <div class="sns-demo">
+          <div class="sns-toggle">
+            <button class="active" onclick="setRatio('1x1',this)">1:1</button>
+            <button onclick="setRatio('4x5',this)">4:5</button>
+            <button onclick="setRatio('9x16',this)">9:16</button>
+          </div>
+          <div class="sns-frame" id="sf" style="height:180px;">
+            <div class="sf-photo"></div>
+            <div class="sf-grad"></div>
+            <div class="sf-content">
+              <span class="sf-badge">徒歩5分</span>
+              <p class="sf-title">桜ヶ丘レジデンス<br>3LDK・南向き</p>
+              <p class="sf-price">4,980<span style="font-size:10px;">万円</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="copy">
+        <p class="num">02 ― SNS投稿</p>
+        <h3>同じ物件データが、そのままInstagram用画像に。</h3>
+        <p>正方形(1:1)、フィード縦長(4:5)、ストーリーズ(9:16)。物件写真とテキストを流用したまま、投稿サイズを選ぶだけで書き出せます。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURE 3: 徒歩分数 ===== -->
+<section class="section">
+  <div class="wrap">
+    <div class="split reveal">
+      <div class="copy">
+        <p class="num">03 ― 自動計算</p>
+        <h3>「徒歩◯分」の表記、暗算しなくていい。</h3>
+        <p>駅やスーパーまでの距離(m)を入れるだけで、不動産表示規約に沿った「80m=徒歩1分・切り上げ」で自動計算。ライフインフォメーション欄にもそのまま追加できます。</p>
+      </div>
+      <div class="visual">
+        <div class="walk-demo">
+          <div class="wd-row">
+            <input type="range" id="walk-range" min="20" max="1200" value="360" oninput="updateWalk(this.value)">
+          </div>
+          <p class="wd-m" id="walk-m" style="text-align:center; min-width:auto;">距離：360m</p>
+          <p class="wd-out" id="walk-out">徒歩5<span>分</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURE 4: 項目網羅 ===== -->
+<section class="section alt">
+  <div class="wrap">
+    <div class="split rev reveal">
+      <div class="visual">
+        <table class="spec-mock">
+          <tr><th>間取り</th><td>3LDK</td></tr>
+          <tr><th>専有面積</th><td>72.14㎡</td></tr>
+          <tr><th>築年月</th><td>2016年3月</td></tr>
+          <tr><th>構造・階数</th><td>RC造 5階建 3階部分</td></tr>
+          <tr><th>取引形態</th><td>媒介</td></tr>
+        </table>
+      </div>
+      <div class="copy">
+        <p class="num">04 ― 項目網羅</p>
+        <h3>マイソクに必要な項目を、抜け漏れなく。</h3>
+        <p>面積・築年月・構造・取引形態といった基本項目に加え、アピールポイントやライフインフォメーションまで、入力欄に沿って埋めるだけで整った形式になります。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURE 5: 書き出し ===== -->
+<section class="section">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="kicker">05 ― 書き出し</p>
+      <h2>できあがったら、そのまま使える形式で。</h2>
+      <p>チラシはPDF、SNS投稿画像はPNG。印刷にも、そのまま投稿にも回せます。</p>
+    </div>
+    <div class="export-row reveal">
+      <div class="export-badge"><span class="dot"></span>マイソクPDF書き出し</div>
+      <div class="export-badge"><span class="dot"></span>Instagram投稿用PNG</div>
+      <div class="export-badge"><span class="dot"></span>ブラウザだけで完結</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FINAL CTA ===== -->
+<section class="final" id="final">
+  <div class="wrap">
+    <h2>次の物件から、<br><em>入力は一度だけ。</em></h2>
+    <p>チラシ作成とSNS投稿、ふたつの作業をひとつにします。</p>
+    <a class="btn-primary" href="https://www.instagram.com/potdesign_maisoku/" target="_blank" rel="noopener">お問い合わせ・ご購入はこちら</a>
+  </div>
+</section>
+
+<footer>© 販売図面自動化ツール</footer>
+
+<script>
+// nav shrink
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 20);
+});
+
+// scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('in'); });
+}, {threshold:0.15});
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// orientation demo
+function setOrient(mode, btn){
+  document.querySelectorAll('.orient-toggle button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const oc = document.getElementById('oc');
+  if(mode === 'l'){ oc.style.width = '212px'; oc.style.height = '150px'; }
+  else{ oc.style.width = '150px'; oc.style.height = '212px'; }
+}
+
+// sns ratio demo
+function setRatio(ratio, btn){
+  document.querySelectorAll('.sns-toggle button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const sf = document.getElementById('sf');
+  const heights = {'1x1':180, '4x5':225, '9x16':320};
+  sf.style.height = heights[ratio] + 'px';
+}
+
+// walk calc demo
+function updateWalk(meters){
+  const minutes = Math.ceil(meters / 80);
+  document.getElementById('walk-out').innerHTML = '徒歩' + minutes + '<span>分</span>';
+  document.getElementById('walk-m').textContent = '距離：' + meters + 'm';
+}
+</script>
+</body>
+</html>
